@@ -1,7 +1,6 @@
 name = Ultimate Mobile
 description = Mobile theme for Drupal
 screenshot = screenshot.png
-; base theme = fusion_core
 core = 7.x
 engine = phptemplate
 
