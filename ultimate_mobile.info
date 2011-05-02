@@ -1,1 +1,32 @@
-name = Ultimate mobile
+name = Ultimate Mobile
+description = Mobile theme for Drupal
+screenshot = screenshot.png
+; base theme = fusion_core
+core = 7.x
+engine = phptemplate
+
+stylesheets[all][] = css/ultimate-mobile.css
+
+regions[header] = Header
+regions[main_menu] = Main menu
+regions[content] = Content
+regions[footer] = Footer
+regions[help] = Help
+
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = favicon
+
+; Default theme settings (override values inherited from fusion_core)
+; settings[theme_yui] = grid12-fluid
+; settings[theme_960][] = grid12-fluid
+; settings[theme_reset] = fluid-100
+; settings[theme_font] = none
+; settings[theme_font_size] = font-size-12
+; settings[breadcrumb_display] = 0
+; settings[sidebar_layout] = sidebars-split
+; settings[sidebar_first_width] = 2
+; settings[sidebar_second_width] = 2
