@@ -4,6 +4,7 @@ screenshot = screenshot.png
 core = 7.x
 engine = phptemplate
 
+stylesheets[all][] = css/reset.css
 stylesheets[all][] = css/ultimate-mobile.css
 
 regions[header] = Header
