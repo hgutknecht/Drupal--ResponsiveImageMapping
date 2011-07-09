@@ -1,0 +1,6 @@
+name = Responsive Image Mapping
+description = Various blocks, pages, and functions for developers.
+package = Image
+; dependencies[] = 
+core = 7.x
+configure = admin/config/image/responsive_mapping
