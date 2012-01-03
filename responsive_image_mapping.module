@@ -1,1 +1,51 @@
 <?php
+/**
+ * @file
+ * Contact: hansdotcom@gmail.com.
+ */
+
+/**
+ * Implementation of hook_permission().
+ */
+function responsive_image_mapping_permission() {
+  return array(
+    'administer responsive image mappings' => array(
+      'title' => t('Administer responsive image mappings'), 
+      'description' => t('Allow image presets to be mapped responsively to another preset.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function responsive_image_mapping_menu() {
+  $items['admin/config/responsiveimages'] = array(
+    'title' => 'Responsive Images',
+    'description' => 'Responsive image mapping of image styles',
+    'position' => 'right',
+    'weight' => 0,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/config/responsiveimages/mappings'] = array(
+    'title' => 'Responsive images - Current mappings',
+    'description' => 'Configure responsive images and their current mappings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('responsive_image_mapping_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'responsive_image_mapping.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/** 
+ *
+ * We can use this to define new styles
+ * function hook_image_default_styles()
+ *
+ */
