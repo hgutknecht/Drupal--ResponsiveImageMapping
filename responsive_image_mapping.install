@@ -8,22 +8,22 @@
  */
 function responsive_image_mapping_schema() {
   $schema['responsive_img_mapping'] = array(
-	  'description' => 'TODO: please describe this table!',
+	  'description' => 'Stores responsive image prset mappings.',
 	  'fields' => array(
 	    'id' => array(
-	      'description' => 'TODO: please describe this field!',
+	      'description' => 'uid',
 	      'type' => 'serial',
 	      'unsigned' => TRUE,
 	      'not null' => TRUE,
 	    ),
 	    'preset_key' => array(
-	      'description' => 'TODO: please describe this field!',
+	      'description' => 'Preset that we are mapping. Preset name.',
 	      'type' => 'varchar',
 	      'length' => '128',
 	      'not null' => FALSE,
 	    ),
 	    'mappings' => array(
-	      'description' => 'TODO: please describe this field!',
+	      'description' => 'Serialized array of image mappings.',
 	      'type' => 'varchar',
 	      'length' => '255',
 	      'not null' => FALSE,

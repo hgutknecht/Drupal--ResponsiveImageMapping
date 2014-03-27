@@ -4,7 +4,7 @@
  * Responsive Image mapping admin.
  *
  */
-function responsive_img_mapping_admin_form($form, &$form_state) {
+function responsive_image_mapping_admin_form($form, &$form_state) {
 
   // Get list of styles.
   // $styles = image_styles();
