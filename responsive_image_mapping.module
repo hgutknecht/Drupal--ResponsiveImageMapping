@@ -5,12 +5,12 @@
  */
 function responsive_image_mapping_menu() {
   $items= array();
-  $items['admin/config/media/image-styles/mp7_responsive'] = array(
-    'title' => 'MP7 Responsive styles',
+  $items['admin/config/media/image-styles/responsive-mappings'] = array(
+    'title' => 'Responsive Image Mappings',
     'description' => 'Select responsive image styles and where they map.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('responsive_image_mapping_admin_form'),
-    'access arguments' => array('administer mp7 responsive image styles'),
+    'access arguments' => array('administer responsive image mappings'),
     'type' => MENU_LOCAL_ACTION,
     'weight' => 3,
     'file' => 'includes/responsive_image_mapping.admin.inc',
@@ -23,8 +23,8 @@ function responsive_image_mapping_menu() {
   */
 function responsive_image_mapping_permission() {
   return array(
-    'administer mp7 responsive image styles' => array(
-      'title' => t('Choose Responsive Image Styles'),
+    'administer responsive image mappings' => array(
+      'title' => t('Choose Responsive Image Style Mappings'),
       'description' => t('Choose which image styles are responsive and where they map.'),
     ),
   );
