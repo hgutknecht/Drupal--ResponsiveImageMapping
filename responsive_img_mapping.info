@@ -1,6 +1,0 @@
-name = Responsive Image Mapping
-description = Creates responsive image mapping for existing image presets
-core = 7.x
-
-dependencies[] = field_formatter_settings
-dependencies[] = image

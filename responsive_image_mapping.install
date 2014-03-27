@@ -2,3 +2,34 @@
 /**
  * Implementation of hook_install().
  */
+
+/**
+ * Implements hook_schema().
+ */
+function responsive_image_mapping_schema() {
+  $schema['responsive_img_mapping'] = array(
+	  'description' => 'TODO: please describe this table!',
+	  'fields' => array(
+	    'id' => array(
+	      'description' => 'TODO: please describe this field!',
+	      'type' => 'serial',
+	      'unsigned' => TRUE,
+	      'not null' => TRUE,
+	    ),
+	    'preset_key' => array(
+	      'description' => 'TODO: please describe this field!',
+	      'type' => 'varchar',
+	      'length' => '128',
+	      'not null' => FALSE,
+	    ),
+	    'mappings' => array(
+	      'description' => 'TODO: please describe this field!',
+	      'type' => 'varchar',
+	      'length' => '255',
+	      'not null' => FALSE,
+	    ),
+	  ),
+	  'primary key' => array('id'),
+	);
+  return $schema;
+}

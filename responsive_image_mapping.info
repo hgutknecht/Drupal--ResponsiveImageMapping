@@ -1,6 +1,6 @@
 name = Responsive Image Mapping
-description = Various blocks, pages, and functions for developers.
-package = Image
-; dependencies[] = 
+description = Creates responsive image mapping for existing image presets
 core = 7.x
-configure = admin/config/image/responsive_mapping
+
+dependencies[] = field_formatter_settings
+dependencies[] = image
