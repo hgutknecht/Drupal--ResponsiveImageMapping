@@ -67,7 +67,13 @@ function responsive_image_mapping_preprocess_image_style(&$variables) {
       while (empty($mappings[$i])) {
         $mappings[$i] = $mappings[$i - 1];
       }
-      $variables['attributes']['data-responsive_image_mapping_' . $i] = image_style_url($mappings[$i], $variables['path']);
+      if ($mappings[$i] !== 'none') {
+        $variables['attributes']['data-responsive_image_mapping_' . $i] = image_style_url($mappings[$i], $variables['path']);
+      }
+      else {
+        $variables['attributes']['data-responsive_image_mapping_' . $i] = 'none';
+      }
+
       $tinyGIF = variable_get('rim_image_default', FALSE);
       if (!$tinyGIF) {
         $path = drupal_get_path('module', 'responsive_image_mapping');
