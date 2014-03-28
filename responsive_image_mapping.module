@@ -75,6 +75,7 @@ function responsive_image_mapping_preprocess_image_style(&$variables) {
     }
     $add_js = &drupal_static(__FUNCTION__ . 'add_js');
     if (!isset($add_js)) {
+      drupal_add_js(drupal_get_path('module', 'responsive_image_mapping') . '/responsive_image_mapping.js');
       drupal_add_js(array('responsive_image_mapping' => array('mappings' => $breakpoints)), 'setting');
       $add_js = TRUE;
     }
