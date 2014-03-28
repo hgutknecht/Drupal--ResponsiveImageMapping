@@ -12,6 +12,7 @@ function responsive_image_mapping_admin_form($form, &$form_state) {
     '#collapsible' => FALSE,
     '#title' => t('Responsive image mapping settings.'),
   );
+  // In the future we can do an ajax callback for the client to add as many breaks as they would like.
   $form['rim_settings']['rim_small_breakpoint'] = array(
     '#type' => 'textfield',
     '#title' => t('Small Breakpoint'),
@@ -109,8 +110,12 @@ function responsive_image_mapping_admin_form_validate($form, &$form_state) {
  */
 function responsive_image_mapping_admin_form_submit($form, &$form_state) {
   // Save the variables.
-  variable_set('rim_small_breakpoint', $form_state['values']['rim_small_breakpoint']);
-  variable_set('rim_medium_breakpoint', $form_state['values']['rim_medium_breakpoint']);
+  // Eventually we can do a foreach on all breakpoints defined.
+  $breakpoints = array(
+    0 => $form_state['values']['rim_small_breakpoint'],
+    1 => $form_state['values']['rim_medium_breakpoint'],
+  );
+  variable_set('rim_breakpoints', $breakpoints);
   variable_set('rim_image_default', $form_state['values']['rim_image_default']);
   // Save the mappings to database.
   if ($form_state['values']['rim_preset_key'] !== 'none') {
@@ -141,7 +146,6 @@ function responsive_image_mapping_edit_form() {
   $form = array();
   $id = arg(6);
   $tag = responsive_image_mapping_get_mappings($id);
-  dpm($tag);
   $style_names = responsive_image_mapping_get_image_style_names();
   $form['rim_add_mapping']['rim_preset_key'] = array(
     '#type' => 'select',
