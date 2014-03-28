@@ -60,17 +60,21 @@ function responsive_image_mapping_preprocess_image_style(&$variables) {
   }
   if (!empty($mappings_result) && $breakpoints = variable_get('rim_breakpoints')) {
     $mappings = unserialize($mappings_result['mappings']);
-    $mappings_count = array_unshift($mappings, $variables['style_name']);
+    $mappings_count = count($mappings);
     $variables['attributes']['class'][] = 'responsive_image_mapping';
+    $variables['attributes']['data-responsive_image_mapping_preset'] = image_style_url($variables['style_name'], $variables['path']);
     for ($i = 0; $i < $mappings_count; $i++) {
       while (empty($mappings[$i])) {
         $mappings[$i] = $mappings[$i - 1];
       }
       $variables['attributes']['data-responsive_image_mapping_' . $i] = image_style_url($mappings[$i], $variables['path']);
       $tinyGIF = variable_get('rim_image_default', FALSE);
-      if ($tinyGIF) {
+      if (!$tinyGIF) {
         $path = drupal_get_path('module', 'responsive_image_mapping');
         $variables['rim_path'] = $path . '/images/rim1px.gif';
+      }
+      else {
+        $variables['style_name'] = $mappings[0];
       }
     }
     $add_js = &drupal_static(__FUNCTION__ . 'add_js');
