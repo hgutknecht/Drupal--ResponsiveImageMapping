@@ -91,11 +91,14 @@ function responsive_image_mapping_admin_form_validate($form, &$form_state) {
   $preset_key = $form_state['values']['rim_preset_key'];
   $mapping_1 = $form_state['values']['rim_mapping_1'];
   $mapping_2 = $form_state['values']['rim_mapping_1'];
-  foreach ($current_mappings as $key => $value) {
-    if ($current_mappings[$key]['preset_key'] == $preset_key) {
-      form_set_error('rim_preset_key', t('A mapping already exists for that preset, please edit or delete the existing one.'));
+  if ($current_mappings) {
+    foreach ($current_mappings as $key => $value) {
+      if ($current_mappings[$key]['preset_key'] == $preset_key) {
+        form_set_error('rim_preset_key', t('A mapping already exists for that preset, please edit or delete the existing one.'));
+      }
     }
   }
+
   if ($preset_key !== 'none' && $mapping_1 == 'none' && $mapping_2 == 'none') {
     form_set_error('mapping_1', t('You must select at least one mapping.'));
   }
