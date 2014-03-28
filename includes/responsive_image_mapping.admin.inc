@@ -176,7 +176,7 @@ function responsive_image_mapping_edit_form() {
    '#value' => t('Save mapping'),
   );
   $form['cancel'] = array(
-   '#markup' => '<a href="admin/config/media/image-styles/responsive-mappings">' . t('Cancel') . '</a>',
+   '#markup' => '<a href="/admin/config/media/image-styles/responsive-mappings">' . t('Cancel') . '</a>',
   );
   return $form;
 }
