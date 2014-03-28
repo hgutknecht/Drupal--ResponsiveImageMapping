@@ -87,7 +87,7 @@ function responsive_image_mapping_preprocess_image_style(&$variables) {
 }
 
 /**
- * Swap out image path with 1px gif if RIM Image default enabled.
+ * Swap out image path with 1px gif if RIM Image default not enabled.
  *
  */
 function responsive_image_mapping_image_style($variables) {
