@@ -84,6 +84,7 @@
     },
     /**
      * Calculate active breakpoint.
+     * -1 represents no break identified, use default.
      * @return int - index of active breakpoint.
      */
     calcBreakpoint: function() {
