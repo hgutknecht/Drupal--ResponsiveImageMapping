@@ -11,31 +11,24 @@ function responsive_image_mapping_admin_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#collapsible' => FALSE,
     '#title' => t('Responsive image mapping settings.'),
+    '#description' => t('To remove a breakpoint leave the field blank and save.')
   );
-  // In the future we can do an ajax callback for the client to add as many breaks as they would like.
-  $form['rim_settings']['rim_small_breakpoint'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Small Breakpoint'),
-    '#description' => t('Breakpoint for small viewports in pixels.'),
-    '#default_value' => variable_get('rim_small_breakpoint', ''),
-  );
-  $form['rim_settings']['rim_medium_breakpoint'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Medium Breakpoint'),
-    '#description' => t('Breakpoint for medium viewports in pixels.'),
-    '#default_value' => variable_get('rim_medium_breakpoint', ''),
-  );
-  $form['rim_settings']['rim_image_default'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Image default.'),
-    '#description' => t('Show small image by default for images with mappings. If not checked a blank gif will be used as a placeholder.'),
-    '#default_value' => variable_get('rim_image_default', FALSE),
-  );
-  // Add mappings form.
+  $current_bps = variable_get('rim_breakpoints');
+  if ($form_state['rebuild'] === TRUE) {
+    $bp_count = $form_state['breakpoints'];
+  }
+  elseif (isset($current_bps)) {
+    $bp_count = count($current_bps);
+  }
+  else {
+    $bp_count = 2;
+  }
+  $bp_counter = 0;
   $form['rim_add_mapping'] = array(
     '#type' => 'fieldset',
     '#collapsible' => FALSE,
     '#title' => t('Image preset mappings.'),
+    '#description' => t('Mapping 1 is the default preset for small screens. Note that it will be used as the default if the "Image Default" option is checked.')
   );
   $form['rim_add_mapping']['rim_preset_key'] = array(
     '#type' => 'select',
@@ -44,19 +37,30 @@ function responsive_image_mapping_admin_form($form, &$form_state) {
     '#description' => t('Choose the image preset to map. If no preset is chosen here, no mapping will be created.'),
     '#default_value' => variable_get('rim_preset_key', array()),
   );
-  $form['rim_add_mapping']['rim_mapping_1'] = array(
-    '#type' => 'select',
-    '#title' => t('Small Breakpoint Mapping'),
-    '#options' => $style_names,
-    '#description' => t('Choose the default preset to be used for small screens. Note this preset will be used for default if the option is chosen above.'),
-    '#default_value' => variable_get('rim_mapping_1', array()),
+  for ($bp_counter; $bp_counter < $bp_count; $bp_counter++) {
+    $form['rim_settings']['breakpoint_' . $bp_counter] = array(
+      '#type' => 'textfield',
+      '#title' => t('Breakpoint') . ' ' .  ($bp_counter + 1),
+      '#default_value' => isset($current_bps[$bp_counter]) ? $current_bps[$bp_counter] : ''
+    );
+
+    $form['rim_add_mapping']['rim_mapping_' . $bp_counter] = array(
+      '#type' => 'select',
+      '#title' => t('Mapping') . ' ' .  ($bp_counter + 1),
+      '#options' => $style_names
+    );
+  }
+  $form['rim_settings']['#bp_count'] = $bp_count;
+  $form['rim_settings']['add_bp'] = array(
+    '#type' => 'submit',
+    '#name' => 'add_bp',
+    '#value' => t('Add another breakpoint')
   );
-  $form['rim_add_mapping']['rim_mapping_2'] = array(
-    '#type' => 'select',
-    '#title' => t('Medium Breakpoint'),
-    '#options' => $style_names,
-    '#description' => t('Choose the default preset to be used for medium screens. Viewports inbetween the breakpoints assigned above.'),
-    '#default_value' => variable_get('rim_mapping_2', array()),
+  $form['rim_settings']['rim_image_default'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Image default.'),
+    '#description' => t('Show small image by default for images with mappings. If not checked a blank gif will be used as a placeholder.'),
+    '#default_value' => variable_get('rim_image_default', FALSE),
   );
   // Existing mappings.
   $current_mappings = responsive_image_mapping_get_mappings();
@@ -67,9 +71,16 @@ function responsive_image_mapping_admin_form($form, &$form_state) {
       '#title' => t('Current mappings.'),
     );
     foreach ($current_mappings as $key => $value) {
+      $mappings_markup = '<strong>Responsive preset:</strong> ' . $current_mappings[$key]['preset_key'];
+      $mappings_counter = 0;
+      $mappings_count = count($current_mappings[$key]);
+      for ($mappings_counter; $mappings_counter < $mappings_count; $mappings_counter++) {
+        $style_mapping = isset($current_mappings[$key]['mappings'][$mappings_counter]) ? $current_mappings[$key]['mappings'][$mappings_counter] : 'none';
+        $mappings_markup .= ' -> ' . $style_mapping;
+      }
       $form['rim_mappings']['mapping_' . $key] = array(
         '#prefix' => '<div>',
-        '#markup' => '<strong>Responsive preset:</strong> ' . $current_mappings[$key]['preset_key'] . ' -> Mapping 1: ' . $current_mappings[$key]['mappings'][0] . ' -> Mapping 2: ' . $current_mappings[$key]['mappings'][1] . '<div class="actions"><a href="/admin/config/media/image-styles/responsive-mappings/edit/' . $current_mappings[$key]['id'] . '">edit</a> | <a href="/admin/config/media/image-styles/responsive-mappings/remove/' . $current_mappings[$key]['id'] . '">remove</a></div>',
+        '#markup' => $mappings_markup . '<div class="actions"><a href="/admin/config/media/image-styles/responsive-mappings/edit/' . $current_mappings[$key]['id'] . '">edit</a> | <a href="/admin/config/media/image-styles/responsive-mappings/remove/' . $current_mappings[$key]['id'] . '">remove</a></div>',
         '#suffix' => '</div>',
       );
     }
@@ -87,23 +98,28 @@ function responsive_image_mapping_admin_form($form, &$form_state) {
  *
  */
 function responsive_image_mapping_admin_form_validate($form, &$form_state) {
-  $current_mappings = responsive_image_mapping_get_mappings();
-  $preset_key = $form_state['values']['rim_preset_key'];
-  $mapping_1 = $form_state['values']['rim_mapping_1'];
-  $mapping_2 = $form_state['values']['rim_mapping_1'];
-  if ($current_mappings) {
-    foreach ($current_mappings as $key => $value) {
-      if ($current_mappings[$key]['preset_key'] == $preset_key) {
-        form_set_error('rim_preset_key', t('A mapping already exists for that preset, please edit or delete the existing one.'));
+  if ($form_state['triggering_element']['#name'] !== 'add_bp') {
+    $current_mappings = responsive_image_mapping_get_mappings();
+    $preset_key = $form_state['values']['rim_preset_key'];
+    $mapping_1 = $form_state['values']['rim_mapping_0'];
+    $mapping_2 = $form_state['values']['rim_mapping_1'];
+    $breakpoint_1 = $form_state['values']['breakpoint_0'];
+    if ($current_mappings) {
+      foreach ($current_mappings as $key => $value) {
+        if ($current_mappings[$key]['preset_key'] == $preset_key) {
+          form_set_error('rim_preset_key', t('A mapping already exists for that preset, please edit or delete the existing one.'));
+        }
       }
     }
-  }
-
-  if ($preset_key !== 'none' && $mapping_1 == 'none' && $mapping_2 == 'none') {
-    form_set_error('mapping_1', t('You must select at least one mapping.'));
-  }
-  if (($mapping_1 == $mapping_2) && ($mapping_2 == $preset_key) && ($preset_key !== 'none')) {
-    form_set_error('rim_preset_key', t('Clever, but no need to map things to themselves. Mapping inception, aborted.'));
+    if ($preset_key !== 'none' && $mapping_1 == 'none' && $mapping_2 == 'none') {
+      form_set_error('mapping_1', t('You must select at least one mapping.'));
+    }
+    if (($mapping_1 == $mapping_2) && ($mapping_2 == $preset_key) && ($preset_key !== 'none')) {
+      form_set_error('rim_preset_key', t('Clever, but no need to map things to themselves. Mapping inception, aborted.'));
+    }
+    if (empty($breakpoint_1)) {
+      form_set_error('breakpoint_0', t('You must set at least one breakpoint.'));
+    }
   }
 }
 
@@ -112,30 +128,36 @@ function responsive_image_mapping_admin_form_validate($form, &$form_state) {
  *
  */
 function responsive_image_mapping_admin_form_submit($form, &$form_state) {
-  // Save the variables.
-  // Eventually we can do a foreach on all breakpoints defined.
-  $breakpoints = array(
-    0 => $form_state['values']['rim_small_breakpoint'],
-    1 => $form_state['values']['rim_medium_breakpoint'],
-  );
-  variable_set('rim_breakpoints', $breakpoints);
-  variable_set('rim_image_default', $form_state['values']['rim_image_default']);
-  // Save the mappings to database.
-  if ($form_state['values']['rim_preset_key'] !== 'none') {
-    $mappings = array(
-      0 => $form_state['values']['rim_mapping_1'],
-      1 => $form_state['values']['rim_mapping_2'],
-    );
-    db_insert('responsive_img_mapping') // Table name no longer needs {}
-      ->fields(array(
-        'preset_key' => $form_state['values']['rim_preset_key'],
-        'mappings' => serialize($mappings),
-      ))
-      ->execute();
-    drupal_set_message(t('Setting saved. Mapping created.'));
+  if ($form_state['triggering_element']['#name'] === 'add_bp') {
+    $form_state['breakpoints'] = $form['rim_settings']['#bp_count'] + 1;
+    $form_state['rebuild'] = TRUE;
   }
   else {
-    drupal_set_message(t('Setting saved. No mapping created, no preset key selected.'));
+    $breakpoints = array();
+    $mappings = array();
+    foreach ($form_state['values'] as $form_key => $form_value) {
+      if (preg_match('/breakpoint_[0-9]+/', $form_key) && !empty($form_value)) {
+        $breakpoints[] = $form_value;
+      }
+      elseif (preg_match('/rim_mapping_[0-9]+/', $form_key) && !empty($form_value)) {
+        $mappings[] = $form_value;
+      }
+    }
+    variable_set('rim_breakpoints', $breakpoints);
+    variable_set('rim_image_default', $form_state['values']['rim_image_default']);
+    // Save the mappings to database.
+    if ($form_state['values']['rim_preset_key'] !== 'none') {
+      db_insert('responsive_img_mapping') // Table name no longer needs {}
+        ->fields(array(
+          'preset_key' => $form_state['values']['rim_preset_key'],
+          'mappings' => serialize($mappings),
+        ))
+        ->execute();
+      drupal_set_message(t('Setting saved. Mapping created.'));
+    }
+    else {
+      drupal_set_message(t('Setting saved. No mapping created, no preset key selected.'));
+    }
   }
 }
 
@@ -157,20 +179,22 @@ function responsive_image_mapping_edit_form() {
     '#description' => t('Choose the image preset to map. If no preset is chosen here, no mapping will be created.'),
     '#default_value' => variable_get('rim_preset_key', $tag['preset_key']),
   );
-  $form['rim_add_mapping']['rim_mapping_1'] = array(
-    '#type' => 'select',
-    '#title' => t('Small Breakpoint Mapping'),
-    '#options' => $style_names,
-    '#description' => t('Choose the default preset to be used for small screens. Note this preset will be used for default if the option is chosen above.'),
-    '#default_value' => variable_get('rim_mapping_1', $tag['mappings'][0]),
-  );
-  $form['rim_add_mapping']['rim_mapping_2'] = array(
-    '#type' => 'select',
-    '#title' => t('Medium Breakpoint'),
-    '#options' => $style_names,
-    '#description' => t('Choose the default preset to be used for medium screens. Viewports inbetween the breakpoints assigned above.'),
-    '#default_value' => variable_get('rim_mapping_2', $tag['mappings'][1]),
-  );
+  $current_bps = variable_get('rim_breakpoints');
+  if (isset($current_bps)) {
+    $bp_count = count($current_bps);
+  }
+  else {
+    $bp_count = 2;
+  }
+  $bp_counter = 0;
+  for ($bp_counter; $bp_counter < $bp_count; $bp_counter++) {
+    $form['rim_add_mapping']['rim_mapping_' . $bp_counter] = array(
+      '#type' => 'select',
+      '#title' => t('Mapping') . ' ' .  ($bp_counter + 1),
+      '#options' => $style_names,
+      '#default_value' => isset($tag['mappings'][$bp_counter]) ? $tag['mappings'][$bp_counter] : 'none',
+    );
+  }
   $form['submit'] = array(
    '#type' => 'submit',
    '#value' => t('Save mapping'),
@@ -188,10 +212,12 @@ function responsive_image_mapping_edit_form() {
 function responsive_image_mapping_edit_form_submit($form, &$form_state) {
   // Save the edited mapping to database.
   if ($form_state['values']['rim_preset_key'] !== 'none') {
-    $mappings = array(
-      0 => $form_state['values']['rim_mapping_1'],
-      1 => $form_state['values']['rim_mapping_2'],
-    );
+    $mappings = array();
+    foreach ($form_state['values'] as $form_key => $form_value) {
+      if (preg_match('/rim_mapping_[0-9]+/', $form_key) && !empty($form_value)) {
+        $mappings[] = $form_value;
+      }
+    }
     db_update('responsive_img_mapping')
       ->fields(array(
         'preset_key' => $form_state['values']['rim_preset_key'],
