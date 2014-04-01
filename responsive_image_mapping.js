@@ -10,7 +10,9 @@
       // Potentially add window resize handling with timeout
     },
     imgSwap: function() {
-      var currentBreakpoint = ''
+      var currentBreakpointMapping = ''
+        , currentBreakpoint = 0
+        , breakpointCounter = 0
         , images = ''
         , currentImage = ''
         , imageLength = 0
@@ -24,11 +26,11 @@
       // Calculate current breakpoint.
       currentBreakpoint = Drupal.behaviors.rimHelpers.calcBreakpoint();
       if (currentBreakpoint >= 0) {
-        currentBreakpoint = 'data-responsive_image_mapping_' + currentBreakpoint;
+        currentBreakpointMapping = 'data-responsive_image_mapping_' + currentBreakpoint;
       }
       else {
         // If we do not match a break, fallback to default.
-        currentBreakpoint = 'data-responsive_image_mapping_preset';
+        currentBreakpointMapping = 'data-responsive_image_mapping_preset';
       }
       // Gather all responsive images.
       images = document.querySelectorAll('img.responsive_image_mapping');
@@ -36,13 +38,20 @@
       for (imageCount = 0; imageCount < imageLength; imageCount++) {
         // If we are on the smallest breakpoint (data-responsive_image_mapping_0)
         // and are serving the smallest image no need to imgSwap.
-        if (currentBreakpoint === 'data-responsive_image_mapping_0' && placeholder === 1) {
+        if (currentBreakpointMapping === 'data-responsive_image_mapping_0' && placeholder === 1) {
           // Left in case we need to do some processing here...
         }
         else {
           // Create the new image and swap in DOM.
           currentImage = images[imageCount];
-          newImgSource = currentImage.getAttribute(currentBreakpoint);
+          newImgSource = currentImage.getAttribute(currentBreakpointMapping);
+          breakpointCounter = currentBreakpoint;
+          while (newImgSource === 'none') {
+            newImgSource = currentImage.getAttribute('data-responsive_image_mapping_' + (breakpointCounter++));
+          }
+          if (newImgSource === null || newImgSource === '') {
+            newImgSource = currentImage.getAttribute('data-responsive_image_mapping_preset');
+          }
           newImg = new Image();
           newImg.onload = function() {
             newImg.onload = null;
