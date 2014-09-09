@@ -35,9 +35,9 @@
       // Gather all responsive images.
       images = document.querySelectorAll('img.responsive_image_mapping');
       imageLength = images.length;
-      for (imageCount = 0; imageCount < imageLength; imageCount++) {
+      for (imageCount; imageCount < imageLength; imageCount++) {
         // If we are on the smallest breakpoint (data-responsive_image_mapping_0)
-        // and are serving the smallest image no need to imgSwap.
+        // and are serving the smallest image, not the 1x1 gif, no need to imgSwap.
         if (currentBreakpointMapping === 'data-responsive_image_mapping_0' && placeholder === 1) {
           // Left in case we need to do some processing here...
         }
@@ -58,7 +58,7 @@
             var imgAttributes = currentImage.attributes;
             var imgAttributeLength = imgAttributes.length;
             for (attrCount = 0; attrCount < imgAttributeLength; attrCount++) {
-              if (imgAttributes[attrCount].name != 'height' && imgAttributes[attrCount].name != 'width' && imgAttributes[attrCount].name != 'src' && imgAttributes[attrCount].name != 'data-borealis-style' && imgAttributes[attrCount].name != 'data-locked') {
+              if (imgAttributes[attrCount].name != 'height' && imgAttributes[attrCount].name != 'width' && imgAttributes[attrCount].name != 'src' && imgAttributes[attrCount].name != 'data-locked' && (imgAttributes[attrCount].name).indexOf('data-responsive_image_mapping_')) {
                 newImg.setAttribute(imgAttributes[attrCount].name, imgAttributes[attrCount].value);
               }
             }
@@ -104,6 +104,7 @@
         , activeBreak = -1;
       breakpoints = Drupal.settings.responsive_image_mapping.mappings;
       breakpoints.forEach(function(breakpoint) {
+        breakpoint = parseInt(breakpoint);
         viewportSize = Drupal.behaviors.rimHelpers.getViewport();
         if ((viewportSize.width > previousBreak) && (viewportSize.width < breakpoint)) {
           activeBreak = breakpointIndex;
