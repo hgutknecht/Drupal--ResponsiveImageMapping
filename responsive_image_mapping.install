@@ -1,6 +1,11 @@
 <?php
 /**
- * Implementation of hook_install().
+ * @file
+ * Install file for responsive image mappings.
+ */
+
+/**
+ * Implements hook_install().
  */
 
 /**
@@ -8,28 +13,28 @@
  */
 function responsive_image_mapping_schema() {
   $schema['responsive_img_mapping'] = array(
-	  'description' => 'Stores responsive image prset mappings.',
-	  'fields' => array(
-	    'id' => array(
-	      'description' => 'uid',
-	      'type' => 'serial',
-	      'unsigned' => TRUE,
-	      'not null' => TRUE,
-	    ),
-	    'preset_key' => array(
-	      'description' => 'Preset that we are mapping. Preset name.',
-	      'type' => 'varchar',
-	      'length' => '128',
-	      'not null' => FALSE,
-	    ),
-	    'mappings' => array(
-	      'description' => 'Serialized array of image mappings.',
-	      'type' => 'varchar',
-	      'length' => '255',
-	      'not null' => FALSE,
-	    ),
-	  ),
-	  'primary key' => array('id'),
-	);
+    'description' => 'Stores responsive image prset mappings.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'uid',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'preset_key' => array(
+        'description' => 'Preset that we are mapping. Preset name.',
+        'type' => 'varchar',
+        'length' => '128',
+        'not null' => FALSE,
+      ),
+      'mappings' => array(
+        'description' => 'Serialized array of image mappings.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
   return $schema;
 }

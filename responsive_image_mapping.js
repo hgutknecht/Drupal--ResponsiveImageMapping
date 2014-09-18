@@ -22,7 +22,7 @@
         , attrCount = 0
         , placeholder = 0;
       // Check if we are using blank gif placeholders.
-      placeholder = Drupal.settings.responsive_image_mapping.tinyGIF;
+      placeholder = Drupal.settings.responsive_image_mapping.tiny_gif;
       // Calculate current breakpoint.
       currentBreakpoint = Drupal.behaviors.rimHelpers.calcBreakpoint();
       if (currentBreakpoint >= 0) {

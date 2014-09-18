@@ -1,7 +1,12 @@
 <?php
 
 /**
- * Implements hook_menu()
+ * @file
+ * Allows user specified, breakpoint driven, responsive image mappings.
+ */
+
+/**
+ * Implements hook_menu().
  */
 function responsive_image_mapping_menu() {
   $items= array();
@@ -34,8 +39,8 @@ function responsive_image_mapping_menu() {
 }
 
 /**
-  * Implements hook_permission
-  */
+ * Implements hook_permission().
+ */
 function responsive_image_mapping_permission() {
   return array(
     'administer responsive image mappings' => array(
@@ -46,7 +51,7 @@ function responsive_image_mapping_permission() {
 }
 
 /**
- * Implements hook_preprocess_image_style()
+ * Implements hook_preprocess_image_style().
  *
  */
 function responsive_image_mapping_preprocess_image_style(&$variables) {
@@ -74,8 +79,8 @@ function responsive_image_mapping_preprocess_image_style(&$variables) {
         $variables['attributes']['data-responsive_image_mapping_' . $i] = 'none';
       }
 
-      $tinyGIF = variable_get('rim_image_default', FALSE);
-      if (!$tinyGIF) {
+      $tiny_gif = variable_get('rim_image_default', FALSE);
+      if (!$tiny_gif) {
         $path = drupal_get_path('module', 'responsive_image_mapping');
         $variables['rim_path'] = $path . '/images/rim1px.gif';
       }
@@ -86,7 +91,7 @@ function responsive_image_mapping_preprocess_image_style(&$variables) {
     $add_js = &drupal_static(__FUNCTION__ . 'add_js');
     if (!isset($add_js)) {
       drupal_add_js(drupal_get_path('module', 'responsive_image_mapping') . '/responsive_image_mapping.js');
-      drupal_add_js(array('responsive_image_mapping' => array('mappings' => $breakpoints, 'tinyGIF' => $tinyGIF)), 'setting');
+      drupal_add_js(array('responsive_image_mapping' => array('mappings' => $breakpoints, 'tiny_gif' => $tiny_gif)), 'setting');
       $add_js = TRUE;
     }
   }
@@ -120,9 +125,9 @@ function responsive_image_mapping_image_style($variables) {
 
 
 /**
-  * Implements hook_theme_registry_alter
-  *
-  */
+ * Implements hook_theme_registry_alter().
+ *
+ */
 function responsive_image_mapping_theme_registry_alter(&$theme_registry) {
   $path = drupal_get_path('module', 'responsive_image_mapping');
   if (!empty($theme_registry['image_style'])) {
