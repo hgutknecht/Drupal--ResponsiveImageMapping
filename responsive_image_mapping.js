@@ -62,8 +62,8 @@
                 newImg.setAttribute(imgAttributes[attrCount].name, imgAttributes[attrCount].value);
               }
             }
-            currentImage.parentNode.replaceChild(newImg, currentImage);
           }
+          currentImage.parentNode.replaceChild(newImg, currentImage);
           newImg.src = newImgSource;
         }
       }
