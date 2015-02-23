@@ -1,0 +1,137 @@
+<?php
+
+/**
+ * @file
+ * Allows user specified, breakpoint driven, responsive image mappings.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function responsive_image_mapping_menu() {
+  $items= array();
+  $items['admin/config/media/image-styles/responsive-mappings'] = array(
+    'title' => 'Responsive Image Mappings',
+    'description' => 'Select responsive image styles and where they map.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('responsive_image_mapping_admin_form'),
+    'access arguments' => array('administer responsive image mappings'),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => 3,
+    'file' => 'includes/responsive_image_mapping.admin.inc',
+  );
+  $items['admin/config/media/image-styles/responsive-mappings/edit/%'] = array(
+    'title' => 'Edit Image Preset Mapping',
+    'description' => 'Re-configure image preset mapping.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('responsive_image_mapping_edit_form', 6),
+    'file' => 'includes/responsive_image_mapping.admin.inc',
+    'access arguments' => array('administer responsive image mappings'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/media/image-styles/responsive-mappings/remove/%'] = array(
+    'page callback' => 'responsive_image_mapping_remove_mapping',
+    'page arguments' => array('responsive_image_mapping_remove_mapping', 6),
+    'file' => 'includes/responsive_image_mapping.admin.inc',
+    'access arguments' => array('administer responsive image mappings'),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function responsive_image_mapping_permission() {
+  return array(
+    'administer responsive image mappings' => array(
+      'title' => t('Choose Responsive Image Style Mappings'),
+      'description' => t('Choose which image styles are responsive and where they map.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_preprocess_image_style().
+ *
+ */
+function responsive_image_mapping_preprocess_image_style(&$variables) {
+  $mappings_result = &drupal_static(__FUNCTION__ . $variables['style_name']);
+  if (!isset($mappings_result)) {
+    $mappings_result = db_select('responsive_img_mapping', 'r')
+      ->fields('r', array('mappings'))
+      ->condition('preset_key', $variables['style_name'], '=')
+      ->execute()
+      ->fetchAssoc();
+  }
+  if (!empty($mappings_result) && $breakpoints = variable_get('rim_breakpoints')) {
+    $mappings = unserialize($mappings_result['mappings']);
+    $mappings_count = count($mappings);
+    $variables['attributes']['class'][] = 'responsive_image_mapping';
+    $variables['attributes']['data-responsive_image_mapping_preset'] = image_style_url($variables['style_name'], $variables['path']);
+    for ($i = 0; $i < $mappings_count; $i++) {
+      while (empty($mappings[$i])) {
+        $mappings[$i] = $mappings[$i - 1];
+      }
+      if ($mappings[$i] !== 'none') {
+        $variables['attributes']['data-responsive_image_mapping_' . $i] = image_style_url($mappings[$i], $variables['path']);
+      }
+      else {
+        $variables['attributes']['data-responsive_image_mapping_' . $i] = 'none';
+      }
+
+      $tiny_gif = variable_get('rim_image_default', FALSE);
+      if (!$tiny_gif) {
+        $path = drupal_get_path('module', 'responsive_image_mapping');
+        $variables['rim_path'] = $path . '/images/rim1px.gif';
+      }
+      else {
+        $variables['style_name'] = $mappings[0];
+      }
+    }
+    $add_js = &drupal_static(__FUNCTION__ . 'add_js');
+    if (!isset($add_js)) {
+      drupal_add_js(drupal_get_path('module', 'responsive_image_mapping') . '/responsive_image_mapping.js');
+      drupal_add_js(array('responsive_image_mapping' => array('mappings' => $breakpoints, 'tiny_gif' => $tiny_gif)), 'setting');
+      $add_js = TRUE;
+    }
+  }
+}
+
+/**
+ * Swap out image path with 1px gif if RIM Image default not enabled.
+ *
+ */
+function responsive_image_mapping_image_style($variables) {
+  $dimensions = array(
+    'width' => $variables['width'],
+    'height' => $variables['height'],
+  );
+
+  image_style_transform_dimensions($variables['style_name'], $dimensions);
+
+  $variables['width'] = $dimensions['width'];
+  $variables['height'] = $dimensions['height'];
+
+  if (isset($variables['rim_path'])) {
+    $variables['path'] = $variables['rim_path'];
+    unset($variables['rim_path']);
+  }
+  else {
+    $variables['path'] = image_style_url($variables['style_name'], $variables['path']);
+  }
+
+  return theme('image', $variables);
+}
+
+
+/**
+ * Implements hook_theme_registry_alter().
+ *
+ */
+function responsive_image_mapping_theme_registry_alter(&$theme_registry) {
+  $path = drupal_get_path('module', 'responsive_image_mapping');
+  if (!empty($theme_registry['image_style'])) {
+    $theme_registry['image_style']['theme path'] = $path;
+    $theme_registry['image_style']['function'] = 'responsive_image_mapping_image_style';
+  }
+}
